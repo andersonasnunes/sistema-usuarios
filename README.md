@@ -133,4 +133,4 @@ routes/
 ### 📩 Contato
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/andersonasnunes/)
->>>>>>> e026f86beabcbf117832d0c542af49aee470b26d
+
