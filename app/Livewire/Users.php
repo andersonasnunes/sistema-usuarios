@@ -14,14 +14,17 @@ class Users extends Component
     public $name;
     public $email;
     public $password;
-    public $status = 'ativo';
+    public int $formKey = 0;
+
+    // boolean 
+    public bool $is_active = true;
 
     public $userId;
     public $isEdit = false;
     public $showForm = false;
 
-    // Filtro: 'todos' | 'ativo' | 'inativo'
-    public $filterStatus = 'todos';
+    // Filtro: 'todos' | '1' | '0'
+    public string $filterStatus = 'todos';
 
     public function mount()
     {
@@ -37,15 +40,17 @@ class Users extends Component
         }
     }
 
+    // Alterna o boolean
     public function toggleStatus()
     {
-        $this->status = $this->status === 'ativo' ? 'inativo' : 'ativo';
+        $this->is_active = !$this->is_active;
     }
 
     public function resetForm()
     {
-        $this->reset(['name', 'email', 'password', 'status', 'userId', 'isEdit', 'showForm']);
-        $this->status = 'ativo';
+        $this->reset(['name', 'email', 'password', 'is_active', 'userId', 'isEdit', 'showForm']);
+        $this->is_active = true;
+        $this->formKey++;
         $this->resetValidation();
     }
 
@@ -54,11 +59,10 @@ class Users extends Component
         $this->showForm = !$this->showForm;
 
         if ($this->showForm) {
-            // Abrindo como "novo usuário"
             $this->isEdit = false;
             $this->userId = null;
             $this->password = null;
-            $this->status = $this->status ?: 'ativo';
+            $this->is_active = $this->is_active ?? true;
             $this->resetValidation();
         } else {
             $this->resetForm();
@@ -73,14 +77,14 @@ class Users extends Component
             'name' => 'required|string|min:3|max:120',
             'email' => 'required|email:rfc,dns|max:190|unique:users,email',
             'password' => 'required|string|min:6|max:255',
-            'status' => 'required|in:ativo,inativo',
+            'is_active' => 'required|boolean',
         ]);
 
         User::create([
             'name' => trim($this->name),
             'email' => strtolower(trim($this->email)),
             'password' => Hash::make($this->password),
-            'status' => $this->status,
+            'is_active' => (bool) $this->is_active,
         ]);
 
         $this->resetForm();
@@ -92,17 +96,18 @@ class Users extends Component
 
         $user = User::findOrFail($id);
 
+        $this->formKey++;
+        $this->resetValidation();
+
         $this->userId = $user->id;
         $this->name = $user->name;
-        $this->email = $user->email;
-        $this->status = $user->status;
-
-        // ✅ importante: não preencher password ao editar
+        $this->email = $user->email;        
+        // boolean no formulário
+        $this->is_active = (bool) $user->is_active;
         $this->password = null;
-
         $this->isEdit = true;
         $this->showForm = true;
-        $this->resetValidation();
+        
     }
 
     public function update()
@@ -115,13 +120,13 @@ class Users extends Component
             'name' => 'required|string|min:3|max:120',
             'email' => 'required|email:rfc,dns|max:190|unique:users,email,' . $this->userId,
             'password' => 'nullable|string|min:6|max:255',
-            'status' => 'required|in:ativo,inativo',
+            'is_active' => 'required|boolean',
         ]);
 
         $data = [
             'name' => trim($this->name),
             'email' => strtolower(trim($this->email)),
-            'status' => $this->status,
+            'is_active' => (bool) $this->is_active,
         ];
 
         if (!empty($this->password)) {
@@ -144,7 +149,8 @@ class Users extends Component
         $query = User::query()->latest();
 
         if ($this->filterStatus !== 'todos') {
-            $query->where('status', $this->filterStatus);
+            // '1' => ativo | '0' => inativo
+            $query->where('is_active', (int) $this->filterStatus);
         }
 
         return view('livewire.users', [

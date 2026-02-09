@@ -14,7 +14,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'status',
+        'is_active',
     ];
 
     protected $hidden = [
@@ -22,7 +22,12 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-    // Removido o cast de status para que o ENUM funcione como string
+    protected $casts = [
+    'is_active' => 'boolean',
+    ];
+
+
+  
     protected function casts(): array
     {
         return [

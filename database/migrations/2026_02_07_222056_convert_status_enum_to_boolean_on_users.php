@@ -11,9 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->enum('status', ['ativo', 'inativo'])->default('ativo');
-                        
+        Schema::table('boolean_on_users', function (Blueprint $table) {
+            //
         });
     }
 
@@ -22,7 +21,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::table('boolean_on_users', function (Blueprint $table) {
             //
         });
     }
